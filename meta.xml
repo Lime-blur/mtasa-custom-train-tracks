@@ -1,13 +1,15 @@
 ﻿<meta>
-	<info author="Lime's projects dev." name="Custom train tracks - Alpha" version="0.0.1" type="script" />
+	<info author="Lime's projects dev." name="Custom train tracks - Alpha" version="0.0.2" type="script" />
 	<oop>true</oop>
 	
 	<script src="custom-tracks_c.lua" type="client" cache="false" />
 	<script src="custom-tracks_s.lua" type="server" />
+	<script src="utils_c.lua" type="client" cache="false" />
+	<script src="shared.lua" type="shared" />
 
-	<file src="freight.dff" />
-	<file src="freight.txd" />
+	<file src="files/freight.dff" />
+	<file src="files/freight.txd" />
 
-	<file src="train_brake.wav" />
-	<file src="train_run.wav" />
+	<file src="files/train_brake.wav" />
+	<file src="files/train_run.wav" />
 </meta>
