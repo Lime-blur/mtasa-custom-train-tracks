@@ -4,4 +4,10 @@
 	
 	<script src="custom-tracks_c.lua" type="client" cache="false" />
 	<script src="custom-tracks_s.lua" type="server" />
+
+	<file src="freight.dff" />
+	<file src="freight.txd" />
+
+	<file src="train_brake.wav" />
+	<file src="train_run.wav" />
 </meta>
