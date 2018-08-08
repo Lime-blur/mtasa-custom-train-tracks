@@ -14,7 +14,7 @@ namespace.getNextTrackPoint = function(trackID, trackPoint)
 	assert(trackPoint, "Missing argument 'trackPoint' at namespace.getNextTrackPoint")
 	if type(trackID) ~= "number" then outputDebugString("Bad argument @ 'namespace.getNextTrackPoint' [Excepted number at argument 1, got " .. type(trackID) .. "]", 2) return false end
 	if type(trackPoint) ~= "number" then outputDebugString("Bad argument @ 'namespace.getNextTrackPoint' [Excepted number at argument 2, got " .. type(trackPoint) .. "]", 2) return false end
-	if (tracksTable[trackID].tracks[trackPoint+1] < #tracksTable[trackID].tracks) then
+	if (tonumber(trackPoint+1) < #tracksTable[trackID].tracks) then
 		return tracksTable[trackID].tracks[trackPoint+1]
 	else
 		return tracksTable[trackID].tracks[1]
@@ -53,11 +53,19 @@ local thisResource = getThisResource()
 
 function createTracksOnResourceStart()
 	setTimer(function()
-		if not customTracks[1] then customTracks[1] = {} end
-		if not customTrains[1] then customTrains[1] = {} end
-		customTracks[1].myTrack = namespace.createTrack(1)
-		customTracks[1].tracks = getElementData(customTracks[1].myTrack, "trainTracks.tracks")
-		customTrains[1].myTrain = namespace.createTrain(1, 2, 1)
+		local myTrackID, myTrainPoint = 1, 2
+		if not customTracks[myTrackID] then customTracks[myTrackID] = {} end
+		if not customTrains[myTrackID] then customTrains[myTrackID] = {} end
+		customTracks[myTrackID].myTrack = namespace.createTrack(myTrackID)
+		customTracks[myTrackID].tracks = getElementData(customTracks[myTrackID].myTrack, "trainTracks.tracks")
+		for i = 1, #customTracks[myTrackID].tracks do
+			local currentPoint = createElement("customTrainTrack.point")
+			setElementData(currentPoint, "trainTracks.currentTrackXYZ", tracksTable[myTrackID].tracks[i])
+			setElementData(currentPoint, "trainTracks.nextTrackXYZ", namespace.getNextTrackPoint(myTrackID, i))
+		end
+		customTrains[myTrackID].myTrain = namespace.createTrain(myTrackID, myTrainPoint, 1)
+		setElementData(customTrains[myTrackID].myTrain, "trainTracks.currentTrainXYZ", tracksTable[myTrackID].tracks[myTrainPoint])
+		setElementData(customTrains[myTrackID].myTrain, "trainTracks.nextTrainXYZ", namespace.getNextTrackPoint(myTrackID, myTrainPoint))
 	end, 2000, 1)
 end
 addEventHandler("onResourceStart", getResourceRootElement(thisResource), createTracksOnResourceStart)
