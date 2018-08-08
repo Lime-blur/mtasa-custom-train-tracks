@@ -17,6 +17,19 @@ function getElementSpeed(element, unit)
 	end
 end
 
+function setElementSpeed(element, unit, speed)
+	local unit = unit or 0
+	local speed = tonumber(speed) or 0
+	local acSpeed = getElementSpeed(element, unit)
+	if (acSpeed) then
+		local diff = speed/acSpeed
+		if diff ~= diff then return false end
+		local x, y, z = getElementVelocity(element)
+		return setElementVelocity(element, x*diff, y*diff, z*diff)
+	end
+	return false
+end
+
 function isEventHandlerAdded(sEventName, pElementAttachedTo, func)
 	if type(sEventName) == "string" and isElement(pElementAttachedTo) and type(func) == "function" then
 		local aAttachedFunctions = getEventHandlers(sEventName, pElementAttachedTo)

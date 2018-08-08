@@ -1,5 +1,5 @@
 ﻿<meta>
-	<info author="Lime's projects dev." name="Custom train tracks - Alpha" version="0.0.2" type="script" />
+	<info author="Lime's projects dev." name="Custom train tracks - Alpha" version="0.0.4" type="script" />
 	<oop>true</oop>
 	
 	<script src="custom-tracks_c.lua" type="client" cache="false" />
