@@ -43,6 +43,7 @@ namespace.createTrain = function(trackID, trackPoint, trainID)
 	if type(trainID) ~= "number" then outputDebugString("Bad argument @ 'namespace.createTrain' [Excepted number at argument 3, got " .. type(trainID) .. "]", 2) return false end
 	local customTrain = createObject(trainsTable[trainID], tracksTable[trackID].tracks[trackPoint][1], tracksTable[trackID].tracks[trackPoint][2], tracksTable[trackID].tracks[trackPoint][3])
 	setElementData(customTrain, "trainTracks.id", trainID) -- TRAIN MODEL ID
+	setElementData(customTrain, "trainTracks.trackID", trackID) -- TRACK ID
 	if (trainID == 1) then
 		triggerClientEvent(root, "trainTracks.onClientTrainSpawn", root) -- NOTIFY CLIENT ABOUT TRAIN CREATING
 	end
@@ -60,7 +61,7 @@ namespace.createTrack = function(trackID)
 	return customTrack
 end
 
--- MOVE TRAIN TO THE NEXT POINT (TEST)
+--[[ MOVE TRAIN TO THE NEXT POINT (TEST)
 
 namespace.moveTrain = function(trackID, train, currentTrainPoint, tX, tY, tZ)
 	moveObject(train, 5000, tX, tY, tZ)
@@ -69,7 +70,6 @@ namespace.moveTrain = function(trackID, train, currentTrainPoint, tX, tY, tZ)
 	setElementData(train, "trainTracks.currentTrainXYZ", nextPosition)
 	nextPosition = namespace.getNextTrackPoint(trackID, namespace.getNextTrackPoint(trackID, currentTrainPoint, true))
 	setElementData(train, "trainTracks.nextTrainXYZ", nextPosition)
-	-- setElementSpeed(train, "kmh", 80) -- BUGGED
 	setTimer(function()
 		local nextPoint = getElementData(train, "trainTracks.currentTrainPoint")
 		setElementData(train, "trainTracks.currentTrainPoint", namespace.getNextTrackPoint(trackID, nextPoint, true))
@@ -79,9 +79,10 @@ namespace.moveTrain = function(trackID, train, currentTrainPoint, tX, tY, tZ)
 		setElementData(train, "trainTracks.nextTrainXYZ", nextPosition)
 		local nX, nY, nZ = unpack(nextPosition)
 		moveObject(train, 5000, nX, nY, nZ)
-		-- setElementSpeed(train, "kmh", 80) -- BUGGED
 	end, 5000, 0)
 end
+
+]]
 
 -- USER PART - BUILDING NEW TRACK WITH NEW TRAIN
 
@@ -106,7 +107,20 @@ function createTracksOnResourceStart()
 		setElementData(customTrains[myTrackID].myTrain, "trainTracks.currentTrainXYZ", tracksTable[myTrackID].tracks[myTrainPoint]) -- SET TRAIN CURRENT POINT DATA
 		setElementData(customTrains[myTrackID].myTrain, "trainTracks.nextTrainXYZ", namespace.getNextTrackPoint(myTrackID, myTrainPoint)) -- NEXT POINT
 		-- TESTING HOW TRAIN'S MOVING
-		namespace.moveTrain(myTrackID, customTrains[myTrackID].myTrain, myTrainPoint, unpack(namespace.getNextTrackPoint(myTrackID, myTrainPoint)))
+		-- namespace.moveTrain(myTrackID, customTrains[myTrackID].myTrain, myTrainPoint, unpack(namespace.getNextTrackPoint(myTrackID, myTrainPoint)))
 	end, 2000, 1)
 end
 addEventHandler("onResourceStart", getResourceRootElement(thisResource), createTracksOnResourceStart)
+
+function setNewTrackPoint(train)
+	local trackID = getElementData(train, "trainTracks.trackID")
+	local nextPoint = getElementData(train, "trainTracks.currentTrainPoint")
+	setElementData(train, "trainTracks.currentTrainPoint", namespace.getNextTrackPoint(trackID, nextPoint, true))
+	local nextPosition = getElementData(train, "trainTracks.nextTrainXYZ")
+	setElementData(train, "trainTracks.currentTrainXYZ", nextPosition)
+	nextPosition = namespace.getNextTrackPoint(trackID, nextPoint)
+	setElementData(train, "trainTracks.nextTrainXYZ", nextPosition)
+	triggerClientEvent(root, "trainTracks.onClientTrainSpawn", root)
+end
+addEvent("trainTracks.onSetTrackPoint", true)
+addEventHandler("trainTracks.onSetTrackPoint", root, setNewTrackPoint)

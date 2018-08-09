@@ -4,6 +4,8 @@
 -- DEVELOPING PART
 
 local thisResource = getThisResource()
+local progress = nil
+local isAllowed = false
 
 -- REPLACE MODELS
 
@@ -18,6 +20,8 @@ addEventHandler("onClientResourceStart", getResourceRootElement(thisResource), r
 -- EVENT WHEN TRAIN SPAWNS
 
 function spawnClientTrain()
+	progress = 0
+	isAllowed = true
 	if not isEventHandlerAdded("onClientRender", root, updateTrainSounds) then
 		addEventHandler("onClientRender", root, updateTrainSounds)
 	end
@@ -50,15 +54,22 @@ addEventHandler("onClientElementDestroy", root,
 -- UPDATE TRAIN'S SOUND AND ROTATION
 
 function updateTrainSounds()
+	progress = progress + 0.005
 	local trains = getElementsByType("object", getResourceRootElement(thisResource))
 	local interior = getElementInterior(localPlayer)
 	local dimension = getElementDimension(localPlayer)
 	for i, train in ipairs(trains) do
 		-- ROTATION
-		local cX, cY, cZ = getElementPosition(train)
+		local cX, cY, cZ = unpack(getElementData(train, "trainTracks.currentTrainXYZ"))
 		local rX, rY, rZ = getElementRotation(train)
 		local nX, nY, nZ = unpack(getElementData(train, "trainTracks.nextTrainXYZ"))
 		setElementRotation(train, findRotation3D(cX, cY, cZ, nX, nY, nZ))
+		local resX, resY, resZ = interpolateBetween(cX, cY, cZ, nX, nY, nZ, progress, "Linear")
+		setElementPosition(train, resX, resY, resZ)
+		if (progress >= 1) and (isAllowed == true) then
+			triggerServerEvent("trainTracks.onSetTrackPoint", localPlayer, train)
+			isAllowed = false
+		end
 		-- SOUND
 		if (getElementInterior(train) == interior) and (getElementDimension(train) == dimension) then
 			local trainID = getElementData(train, "trainTracks.id")
