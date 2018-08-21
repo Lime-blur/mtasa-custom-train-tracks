@@ -61,28 +61,34 @@ namespace.createTrack = function(trackID)
 	return customTrack
 end
 
---[[ MOVE TRAIN TO THE NEXT POINT (TEST)
+-- MOVE TRAIN TO THE NEXT POINT (IN PROCESS)
 
 namespace.moveTrain = function(trackID, train, currentTrainPoint, tX, tY, tZ)
-	moveObject(train, 5000, tX, tY, tZ)
-	setElementData(train, "trainTracks.currentTrainPoint", namespace.getNextTrackPoint(trackID, currentTrainPoint, true))
-	local nextPosition = getElementData(train, "trainTracks.nextTrainXYZ")
-	setElementData(train, "trainTracks.currentTrainXYZ", nextPosition)
-	nextPosition = namespace.getNextTrackPoint(trackID, namespace.getNextTrackPoint(trackID, currentTrainPoint, true))
-	setElementData(train, "trainTracks.nextTrainXYZ", nextPosition)
-	setTimer(function()
-		local nextPoint = getElementData(train, "trainTracks.currentTrainPoint")
+	local nextPosition = getElementData(train, "trainTracks.nextTrainXYZ") -- GET NEXT POINT DATA
+	local oX, oY, oZ = unpack(nextPosition) -- GET EACH COORDINATE
+	oX, oY, oZ = oX-tX, oY-tY, oZ-tZ -- LENGTH OF EACH COORDINATE
+	local vectorLength = math.abs(math.sqrt(math.pow(oX, 2) + math.pow(oY, 2) + math.pow(oZ, 2))) -- GET WAY LENGTH NUMBER
+	moveObject(train, vectorLength*1000, tX, tY, tZ)
+	tracksTable[trackID].timeInterval = vectorLength*1000
+	setElementData(train, "trainTracks.currentTrainPoint", namespace.getNextTrackPoint(trackID, currentTrainPoint, true)) -- PLUS ONE TO POINT NUMBER
+	setElementData(train, "trainTracks.currentTrainXYZ", nextPosition) -- SET CURRENT POINT DATA TO THE NEXT
+	nextPosition = namespace.getNextTrackPoint(trackID, namespace.getNextTrackPoint(trackID, currentTrainPoint, true)) -- REWRITE VARIABLE AND SET VALUE OF NEXT POINT NUMBER
+	setElementData(train, "trainTracks.nextTrainXYZ", nextPosition) -- SET NEXT POINT DATA
+	setTimer(function() -- REPEAT FOR THE NEXT POINTS
+		local nextPoint = getElementData(train, "trainTracks.currentTrainPoint") -- GET NUMBER OF CURRENT POINT
 		setElementData(train, "trainTracks.currentTrainPoint", namespace.getNextTrackPoint(trackID, nextPoint, true))
 		local nextPosition = getElementData(train, "trainTracks.nextTrainXYZ")
+		local cX, cY, cZ = unpack(getElementData(train, "trainTracks.currentTrainXYZ"))
 		setElementData(train, "trainTracks.currentTrainXYZ", nextPosition)
 		nextPosition = namespace.getNextTrackPoint(trackID, nextPoint)
 		setElementData(train, "trainTracks.nextTrainXYZ", nextPosition)
 		local nX, nY, nZ = unpack(nextPosition)
-		moveObject(train, 5000, nX, nY, nZ)
-	end, 5000, 0)
+		lX, lY, lZ = nX-cX, nY-cY, nZ-cZ -- LENGTH OF EACH COORDINATE
+		local vectorLength = math.abs(math.sqrt(math.pow(lX, 2) + math.pow(lY, 2) + math.pow(lZ, 2))) -- GET WAY LENGTH NUMBER
+		moveObject(train, vectorLength*1000, nX, nY, nZ)
+		tracksTable[trackID].timeInterval = vectorLength*1000
+	end, tracksTable[trackID].timeInterval, 0)
 end
-
-]]
 
 -- USER PART - BUILDING NEW TRACK WITH NEW TRAIN
 
@@ -106,8 +112,7 @@ function createTracksOnResourceStart()
 		setElementData(customTrains[myTrackID].myTrain, "trainTracks.currentTrainPoint", myTrainPoint) -- SET TRAIN CURRENT POINT
 		setElementData(customTrains[myTrackID].myTrain, "trainTracks.currentTrainXYZ", tracksTable[myTrackID].tracks[myTrainPoint]) -- SET TRAIN CURRENT POINT DATA
 		setElementData(customTrains[myTrackID].myTrain, "trainTracks.nextTrainXYZ", namespace.getNextTrackPoint(myTrackID, myTrainPoint)) -- NEXT POINT
-		-- TESTING HOW TRAIN'S MOVING
-		-- namespace.moveTrain(myTrackID, customTrains[myTrackID].myTrain, myTrainPoint, unpack(namespace.getNextTrackPoint(myTrackID, myTrainPoint)))
+		namespace.moveTrain(myTrackID, customTrains[myTrackID].myTrain, myTrainPoint, unpack(namespace.getNextTrackPoint(myTrackID, myTrainPoint)))
 	end, 2000, 1)
 end
 addEventHandler("onResourceStart", getResourceRootElement(thisResource), createTracksOnResourceStart)

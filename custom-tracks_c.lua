@@ -59,13 +59,12 @@ function updateTrainSounds()
 	local interior = getElementInterior(localPlayer)
 	local dimension = getElementDimension(localPlayer)
 	for i, train in ipairs(trains) do
-		-- ROTATION
+		-- SPEED
 		local cX, cY, cZ = unpack(getElementData(train, "trainTracks.currentTrainXYZ"))
-		local rX, rY, rZ = getElementRotation(train)
 		local nX, nY, nZ = unpack(getElementData(train, "trainTracks.nextTrainXYZ"))
 		setElementRotation(train, findRotation3D(cX, cY, cZ, nX, nY, nZ))
 		local resX, resY, resZ = interpolateBetween(cX, cY, cZ, nX, nY, nZ, progress, "Linear")
-		setElementPosition(train, resX, resY, resZ)
+		setElementVelocity(train, (cX-resX)/progress, (cY-resY)/progress, (cZ-resZ)/progress)
 		if (progress >= 1) and (isAllowed == true) then
 			triggerServerEvent("trainTracks.onSetTrackPoint", localPlayer, train)
 			isAllowed = false
@@ -95,8 +94,7 @@ function updateTrainSounds()
 					setSoundMaxDistance(trainSounds[train], 60)
 					currentTrainSound[train] = 1
 				elseif getElementSpeed(train, "kmh") > 10 and currentTrainSound[train] == 1 then
-					-- SET SOUND SPEED - DIDN'T TESTED
-					local soundSpeed = getElementSpeed(train, "kmh") / 10 -- TEMP
+					local soundSpeed = getElementSpeed(train, "kmh") / 2000
 					if trainSounds[train] then
 						setSoundSpeed(trainSounds[train], soundSpeed)
 					else
