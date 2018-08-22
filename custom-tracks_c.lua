@@ -63,8 +63,8 @@ function updateTrainSounds()
 		local cX, cY, cZ = unpack(getElementData(train, "trainTracks.currentTrainXYZ"))
 		local nX, nY, nZ = unpack(getElementData(train, "trainTracks.nextTrainXYZ"))
 		setElementRotation(train, findRotation3D(cX, cY, cZ, nX, nY, nZ))
-		local resX, resY, resZ = interpolateBetween(cX, cY, cZ, nX, nY, nZ, progress, "Linear")
-		setElementVelocity(train, (cX-resX)/progress, (cY-resY)/progress, (cZ-resZ)/progress)
+		-- local resX, resY, resZ = interpolateBetween(cX, cY, cZ, nX, nY, nZ, progress, "Linear")
+		-- setElementVelocity(train, (cX-resX)/progress, (cY-resY)/progress, (cZ-resZ)/progress)
 		if (progress >= 1) and (isAllowed == true) then
 			triggerServerEvent("trainTracks.onSetTrackPoint", localPlayer, train)
 			isAllowed = false

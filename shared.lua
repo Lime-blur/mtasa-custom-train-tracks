@@ -6,7 +6,7 @@ trainsTable = {
 }
 tracksTable= {
 	[1] = {
-		timeInterval = 1000,
+		timeInterval = 100,
 		tracks = {
 			{2305.3078613281, -2144.0087890625, 15},
 			{2231.5627441406, -2070.2041015625, 15},

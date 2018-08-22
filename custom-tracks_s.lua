@@ -64,12 +64,13 @@ end
 -- MOVE TRAIN TO THE NEXT POINT (IN PROCESS)
 
 namespace.moveTrain = function(trackID, train, currentTrainPoint, tX, tY, tZ)
-	local nextPosition = getElementData(train, "trainTracks.nextTrainXYZ") -- GET NEXT POINT DATA
-	local oX, oY, oZ = unpack(nextPosition) -- GET EACH COORDINATE
-	oX, oY, oZ = oX-tX, oY-tY, oZ-tZ -- LENGTH OF EACH COORDINATE
+	local currentPosition = getElementData(train, "trainTracks.currentTrainXYZ") -- GET CURRENT POINT DATA
+	local oX, oY, oZ = unpack(currentPosition) -- GET EACH COORDINATE
+	oX, oY, oZ = tX-oX, tY-oY, tZ-oZ -- LENGTH OF EACH COORDINATE
 	local vectorLength = math.abs(math.sqrt(math.pow(oX, 2) + math.pow(oY, 2) + math.pow(oZ, 2))) -- GET WAY LENGTH NUMBER
 	moveObject(train, vectorLength*1000, tX, tY, tZ)
 	tracksTable[trackID].timeInterval = vectorLength*1000
+	local nextPosition = getElementData(train, "trainTracks.nextTrainXYZ") -- GET NEXT POINT DATA
 	setElementData(train, "trainTracks.currentTrainPoint", namespace.getNextTrackPoint(trackID, currentTrainPoint, true)) -- PLUS ONE TO POINT NUMBER
 	setElementData(train, "trainTracks.currentTrainXYZ", nextPosition) -- SET CURRENT POINT DATA TO THE NEXT
 	nextPosition = namespace.getNextTrackPoint(trackID, namespace.getNextTrackPoint(trackID, currentTrainPoint, true)) -- REWRITE VARIABLE AND SET VALUE OF NEXT POINT NUMBER
@@ -78,16 +79,18 @@ namespace.moveTrain = function(trackID, train, currentTrainPoint, tX, tY, tZ)
 		local nextPoint = getElementData(train, "trainTracks.currentTrainPoint") -- GET NUMBER OF CURRENT POINT
 		setElementData(train, "trainTracks.currentTrainPoint", namespace.getNextTrackPoint(trackID, nextPoint, true))
 		local nextPosition = getElementData(train, "trainTracks.nextTrainXYZ")
-		local cX, cY, cZ = unpack(getElementData(train, "trainTracks.currentTrainXYZ"))
 		setElementData(train, "trainTracks.currentTrainXYZ", nextPosition)
 		nextPosition = namespace.getNextTrackPoint(trackID, nextPoint)
 		setElementData(train, "trainTracks.nextTrainXYZ", nextPosition)
+		local cX, cY, cZ = unpack(getElementData(train, "trainTracks.currentTrainXYZ"))
 		local nX, nY, nZ = unpack(nextPosition)
-		lX, lY, lZ = nX-cX, nY-cY, nZ-cZ -- LENGTH OF EACH COORDINATE
+		local lX, lY, lZ = nX-cX, nY-cY, nZ-cZ -- LENGTH OF EACH COORDINATE
 		local vectorLength = math.abs(math.sqrt(math.pow(lX, 2) + math.pow(lY, 2) + math.pow(lZ, 2))) -- GET WAY LENGTH NUMBER
+		outputChatBox(vectorLength)
 		moveObject(train, vectorLength*1000, nX, nY, nZ)
 		tracksTable[trackID].timeInterval = vectorLength*1000
 	end, tracksTable[trackID].timeInterval, 0)
+	-- TIMER CAN'T UPDATING, TROUBLE (BROKEN FUNCTION)
 end
 
 -- USER PART - BUILDING NEW TRACK WITH NEW TRAIN
